@@ -77,6 +77,9 @@
       <button class="nav-item" data-view="stats">
         <span class="nav-icon">📈</span> Stats
       </button>
+      <button class="nav-item" data-view="settings">
+        <span class="nav-icon">⚙️</span> Settings
+      </button>
     </nav>
     <div class="sidebar-footer">
       <span id="sidebar-user" class="sidebar-username"></span>
@@ -191,6 +194,25 @@
         <div id="stats-status" class="status-bar"></div>
         <div id="stats-summary" class="summary-box"></div>
         <div id="stats-results" class="results-table-wrap"></div>
+      </section>
+    </div>
+
+    <!-- ── SETTINGS VIEW ── -->
+    <div id="view-settings" class="view">
+      <div class="view-header">
+        <h1>Settings</h1>
+        <p class="view-subtitle">Store your personal ValueSERP API key</p>
+      </div>
+
+      <section class="card">
+        <div class="field">
+          <label>ValueSERP API Key</label>
+          <input type="text" id="settings-api-key" placeholder="Enter your ValueSERP API key" />
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" id="btn-save-api-key">Save API Key</button>
+        </div>
+        <div id="settings-status" class="status-bar"></div>
       </section>
     </div>
 

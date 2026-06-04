@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import sql from '../db/index.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const { Router } = express;
 
@@ -45,7 +46,7 @@ router.post('/register', async (req, res) => {
     );
 
     res.cookie('token', token, COOKIE_OPTIONS);
-    return res.status(201).json({ user: { id: user.id, email: user.email, name: user.name } });
+    return res.status(201).json({ user: { id: user.id, email: user.email, name: user.name, hasApiKey: false } });
   } catch (err) {
     console.error('[Auth] Register error:', err);
     return res.status(500).json({ error: 'Server error during registration' });
@@ -81,7 +82,7 @@ router.post('/login', async (req, res) => {
     );
 
     res.cookie('token', token, COOKIE_OPTIONS);
-    return res.json({ user: { id: user.id, email: user.email, name: user.name } });
+    return res.json({ user: { id: user.id, email: user.email, name: user.name, hasApiKey: false } });
   } catch (err) {
     console.error('[Auth] Login error:', err);
     return res.status(500).json({ error: 'Server error during login' });
@@ -95,21 +96,49 @@ router.post('/logout', (req, res) => {
 });
 
 // GET /api/auth/me
-router.get('/me', async (req, res) => {
+router.get('/me', requireAuth, async (req, res) => {
   try {
-    const token = req.cookies?.token;
-    if (!token) return res.status(401).json({ error: 'Not authenticated' });
-
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
     const [user] = await sql`
-      SELECT id, email, name, created_at FROM users WHERE id = ${payload.userId}
+      SELECT id, email, name, created_at,
+             api_key IS NOT NULL AS has_api_key
+      FROM users
+      WHERE id = ${req.userId}
     `;
 
     if (!user) return res.status(401).json({ error: 'User not found' });
 
-    return res.json({ user });
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        created_at: user.created_at,
+        hasApiKey: user.has_api_key,
+      },
+    });
   } catch (err) {
-    return res.status(401).json({ error: 'Invalid session' });
+    console.error('[Auth] Me error:', err);
+    return res.status(500).json({ error: 'Unable to verify session' });
+  }
+});
+
+router.put('/api-key', requireAuth, async (req, res) => {
+  try {
+    const { apiKey } = req.body;
+    if (!apiKey || typeof apiKey !== 'string') {
+      return res.status(400).json({ error: 'API key is required' });
+    }
+
+    await sql`
+      UPDATE users
+      SET api_key = ${apiKey}
+      WHERE id = ${req.userId}
+    `;
+
+    return res.json({ message: 'ValueSERP API key saved' });
+  } catch (err) {
+    console.error('[Auth] Save API key error:', err);
+    return res.status(500).json({ error: 'Failed to save API key' });
   }
 });
 

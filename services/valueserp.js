@@ -20,9 +20,8 @@ function extractLocalResults(data) {
   return localResults;
 }
 
-async function checkSingleKeyword(keyword, businessName, location) {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error('API_KEY environment variable is missing');
+async function checkSingleKeyword(keyword, businessName, location, apiKey) {
+  if (!apiKey) throw new Error('ValueSERP API key is required');
 
   let retryDelay = RETRY_DELAY_MS;
 
@@ -132,14 +131,14 @@ async function checkSingleKeyword(keyword, businessName, location) {
   }
 }
 
-export async function checkRankings(keywords, businessName, location) {
+export async function checkRankings(keywords, businessName, location, apiKey) {
   const results = [];
 
   for (let i = 0; i < keywords.length; i++) {
     const keyword = keywords[i].toLowerCase();
     console.log(`[ValueSERP] Checking keyword ${i + 1}/${keywords.length}: "${keyword}"`);
 
-    const result = await checkSingleKeyword(keyword, businessName, location);
+    const result = await checkSingleKeyword(keyword, businessName, location, apiKey);
     results.push(result);
 
     if (i < keywords.length - 1) {

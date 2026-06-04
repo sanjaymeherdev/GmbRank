@@ -21,6 +21,13 @@ async function getKeywordSetContext(keywordSetId, userId) {
   return row || null;
 }
 
+async function getUserApiKey(userId) {
+  const [row] = await sql`
+    SELECT api_key FROM users WHERE id = ${userId}
+  `;
+  return row?.api_key ?? null;
+}
+
 // POST /api/keyword-sets/:id/check
 // Triggers a SerpAPI rank check for all keywords. Takes 2-5 min.
 router.post('/:id/check', requireAuth, async (req, res) => {
@@ -30,7 +37,12 @@ router.post('/:id/check', requireAuth, async (req, res) => {
 
     console.log(`[Rankings] Starting check for "${ctx.business_name}" - ${ctx.keywords.length} keywords`);
 
-    const results = await checkRankings(ctx.keywords, ctx.business_name, ctx.location_string);
+    const apiKey = await getUserApiKey(req.userId);
+    if (!apiKey) {
+      return res.status(400).json({ error: 'Please configure your personal ValueSERP API key in Settings' });
+    }
+
+    const results = await checkRankings(ctx.keywords, ctx.business_name, ctx.location_string, apiKey);
 
     // Bulk insert all results
     if (results.length > 0) {

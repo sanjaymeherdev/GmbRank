@@ -31,6 +31,7 @@ const state = {
   check: { bizId: null, ksetId: null, date: null },
   // Stats dropdowns
   stats: { bizId: null, ksetId: null },
+  settings: {},
 };
 
 // ── DOM Helpers ────────────────────────────────────────────
@@ -63,6 +64,15 @@ function populateSelect(selectEl, items, valueKey, labelKey, placeholder) {
     opt.value = item[valueKey];
     opt.textContent = item[labelKey];
     selectEl.appendChild(opt);
+  }
+}
+
+function initSettingsView() {
+  $('settings-api-key').value = '';
+  if (state.user?.hasApiKey) {
+    setStatus('settings-status', '✅ You have a ValueSERP API key configured.', 'ok');
+  } else {
+    setStatus('settings-status', 'Enter your personal ValueSERP API key to use ranking checks.', '');
   }
 }
 
@@ -131,6 +141,30 @@ $('btn-logout').addEventListener('click', async () => {
   showAuth();
 });
 
+$('btn-save-api-key').addEventListener('click', async () => {
+  const apiKey = $('settings-api-key').value.trim();
+  const btn = $('btn-save-api-key');
+
+  if (!apiKey) {
+    setStatus('settings-status', '❌ Please enter your ValueSERP API key.', 'err');
+    return;
+  }
+
+  btn.disabled = true;
+  setStatus('settings-status', 'Saving API key...', 'loading');
+
+  try {
+    await API.put('/auth/api-key', { apiKey });
+    state.user.hasApiKey = true;
+    setStatus('settings-status', '✅ ValueSERP API key saved successfully.', 'ok');
+    $('settings-api-key').value = '';
+  } catch (err) {
+    setStatus('settings-status', '❌ ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 // ── Navigation ─────────────────────────────────────────────
 document.querySelectorAll('.nav-item').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -141,6 +175,7 @@ document.querySelectorAll('.nav-item').forEach((btn) => {
 
     if (btn.dataset.view === 'check') initCheckView();
     if (btn.dataset.view === 'stats') initStatsView();
+    if (btn.dataset.view === 'settings') initSettingsView();
   });
 });
 
