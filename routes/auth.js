@@ -129,16 +129,21 @@ router.put('/api-key', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'API key is required' });
     }
 
-    await sql`
+    const result = await sql`
       UPDATE users
       SET api_key = ${apiKey}
       WHERE id = ${req.userId}
+      RETURNING id, email, api_key IS NOT NULL as has_api_key
     `;
 
-    return res.json({ message: 'ValueSERP API key saved' });
+    if (!result || result.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json({ message: 'ValueSERP API key saved', user: result[0] });
   } catch (err) {
     console.error('[Auth] Save API key error:', err);
-    return res.status(500).json({ error: 'Failed to save API key' });
+    return res.status(500).json({ error: 'Failed to save API key: ' + err.message });
   }
 });
 
