@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GBP Rank Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── AUTH PAGE ─────────────────────────────────────────── -->
+<div id="page-auth" class="page active">
+  <div class="auth-bg">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-icon">📍</span>
+        <span class="logo-text">GBP Rank</span>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Login</button>
+        <button class="auth-tab" data-tab="register">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="form-login" class="auth-form active">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" />
+        </div>
+        <button class="btn-primary full" id="btn-login">Login</button>
+        <p id="login-error" class="form-error"></p>
+      </div>
+
+      <!-- Register Form -->
+      <div id="form-register" class="auth-form">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="Your name" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Min 8 characters" />
+        </div>
+        <button class="btn-primary full" id="btn-register">Create Account</button>
+        <p id="reg-error" class="form-error"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ───────────────────────────────────────────── -->
+<div id="page-app" class="page">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">📍</span>
+      <span class="logo-text">GBP Rank</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="home">
+        <span class="nav-icon">🏠</span> Dashboard
+      </button>
+      <button class="nav-item" data-view="check">
+        <span class="nav-icon">📊</span> Rank Check
+      </button>
+      <button class="nav-item" data-view="stats">
+        <span class="nav-icon">📈</span> Stats
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <span id="sidebar-user" class="sidebar-username"></span>
+      <button class="btn-logout" id="btn-logout">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ── HOME / DASHBOARD VIEW ── -->
+    <div id="view-home" class="view active">
+      <div class="view-header">
+        <h1>Dashboard</h1>
+        <p class="view-subtitle">Manage businesses and trigger rank checks</p>
+      </div>
+
+      <!-- Add Business Form -->
+      <section class="card">
+        <h2 class="card-title">Add / Check Rankings</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label>Business Name</label>
+            <input type="text" id="home-business" placeholder="e.g. Joe's Pizza" />
+          </div>
+          <div class="field">
+            <label>Location</label>
+            <input type="text" id="home-location" placeholder="e.g. Mumbai, Maharashtra, India" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Keywords <span class="hint">(one per line)</span></label>
+          <textarea id="home-keywords" rows="5" placeholder="pizza near me&#10;best pizza mumbai&#10;pizza delivery andheri"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" id="btn-save-business">💾 Save Business</button>
+          <button class="btn-accent" id="btn-check-rankings">🚀 Check Rankings</button>
+          <button class="btn-ghost" id="btn-clear-form">Clear</button>
+        </div>
+        <div id="home-status" class="status-bar"></div>
+      </section>
+
+      <!-- Saved Businesses -->
+      <section class="card">
+        <h2 class="card-title">Saved Businesses</h2>
+        <div class="toolbar">
+          <select id="home-biz-dropdown" class="select-input">
+            <option value="">Select Business</option>
+          </select>
+          <select id="home-loc-dropdown" class="select-input" disabled>
+            <option value="">Select Location</option>
+          </select>
+          <select id="home-kset-dropdown" class="select-input" disabled>
+            <option value="">Select Keyword Set</option>
+          </select>
+        </div>
+        <div id="home-kw-display" class="keyword-display"></div>
+        <div class="form-actions">
+          <button class="btn-ghost" id="btn-load-data">Load into Form</button>
+          <button class="btn-ghost" id="btn-edit-kw">Edit Keywords</button>
+          <button class="btn-danger" id="btn-delete-biz">Delete Business</button>
+          <button class="btn-danger" id="btn-delete-loc">Delete Location</button>
+          <button class="btn-danger" id="btn-delete-kset">Delete Keyword Set</button>
+        </div>
+        <div id="home-manage-status" class="status-bar"></div>
+      </section>
+    </div>
+
+    <!-- ── RANK CHECK VIEW ── -->
+    <div id="view-check" class="view">
+      <div class="view-header">
+        <h1>Rank Check</h1>
+        <p class="view-subtitle">View ranking results by date</p>
+      </div>
+
+      <section class="card">
+        <div class="toolbar">
+          <select id="check-biz-dropdown" class="select-input">
+            <option value="">Select Business</option>
+          </select>
+          <select id="check-kset-dropdown" class="select-input" disabled>
+            <option value="">Select Keyword Set</option>
+          </select>
+          <select id="check-date-dropdown" class="select-input" disabled>
+            <option value="">Select Date</option>
+          </select>
+          <button class="btn-primary" id="btn-get-rank" disabled>Get Rankings</button>
+        </div>
+        <div id="check-status" class="status-bar"></div>
+        <div id="check-summary" class="summary-box"></div>
+        <div id="check-results" class="results-table-wrap"></div>
+      </section>
+    </div>
+
+    <!-- ── STATS VIEW ── -->
+    <div id="view-stats" class="view">
+      <div class="view-header">
+        <h1>Statistics</h1>
+        <p class="view-subtitle">Historical performance across all checks</p>
+      </div>
+
+      <section class="card">
+        <div class="toolbar">
+          <select id="stats-biz-dropdown" class="select-input">
+            <option value="">Select Business</option>
+          </select>
+          <select id="stats-kset-dropdown" class="select-input" disabled>
+            <option value="">Select Keyword Set</option>
+          </select>
+          <button class="btn-primary" id="btn-get-stats" disabled>Load Stats</button>
+        </div>
+        <div id="stats-status" class="status-bar"></div>
+        <div id="stats-summary" class="summary-box"></div>
+        <div id="stats-results" class="results-table-wrap"></div>
+      </section>
+    </div>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
